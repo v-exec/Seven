@@ -32,6 +32,7 @@ body {
 	height: 420px;
 	margin-top: -210px;
 	margin-left: -450px;
+	transition: margin-left 0.4s;
 }
 
 #frame {

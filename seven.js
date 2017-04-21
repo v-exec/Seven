@@ -1,4 +1,4 @@
-//setup variables
+//----------------- Setup
 var canvas = document.getElementById('back');
 var ctx = canvas.getContext('2d');
 
@@ -17,6 +17,18 @@ var n, s, t, d, w, h;
 var reader = new FileReader();
 var img = new Image();
 
+var zooming = false;
+
+var dropZone = document.getElementById('drop');
+dropZone.addEventListener('dragover', handleDragOver, false);
+dropZone.addEventListener('drop', handleFileSelect, false);
+
+window.addEventListener("DOMContentLoaded", function () {
+    setup();
+});
+
+//----------------- General
+
 //fit canvas to its container
 function fitToContainer() {
     canvas.style.width = '100%';
@@ -29,6 +41,8 @@ function fitToContainer() {
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+//----------------- DOM
 
 //gets image and data to html elements
 function data() {
@@ -72,11 +86,41 @@ function color(image) {
 	}
 }
 
+//used to sort colors by brightness
 function compareColors(a, b) {
 	var aa = (a[0] + a[1] + a[2]) / 3;
 	var ab = (b[0] + b[1] + b[2]) / 3;
 	return aa - ab;
 }
+
+//zoom into image
+function zoom() {
+	if (img.width != 0) {
+		if (!zooming) {
+			if (img.width > canvas.width || img.height > canvas.height) {
+				document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: 100%; height: 100%;");
+				if (img.width - canvas.width > img.height - canvas.height) {
+					document.getElementById('center').setAttribute("style", "width: "+canvas.width+"px; height:"+ canvas.width / (w/h).toFixed(2) +"px; margin-left: -"+canvas.width/2+"px; margin-top: -"+ (canvas.width / (w/h).toFixed(2))/2+"px;");
+				} else {
+					document.getElementById('center').setAttribute("style", "width: "+canvas.height * (w/h).toFixed(2)+"px; height:"+canvas.height+"px; margin-left: -"+canvas.height * (w/h).toFixed(2)/2+"px; margin-top: -"+canvas.height/2+"px;");
+				}
+			} else {
+				document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: 100%; height: 100%;");
+				document.getElementById('center').setAttribute("style", "width: "+img.width+"px; height:"+img.height+"px; margin-left: -"+img.width/2+"px; margin-top: -"+img.height/2+"px;");
+			}
+			document.getElementById('data').setAttribute("style", "display: none;");
+			zooming = true;
+
+		} else {
+			document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: " + (w / h).toFixed(2) * 420 + "px;");
+			document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 270)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 270)/2*-1 + "px;");
+			document.getElementById('data').setAttribute("style", "");
+			zooming = false;
+		}
+	}
+}
+
+//----------------- Drawing
 
 //draws dot
 function drawDot(x, y) {
@@ -89,36 +133,7 @@ function drawDot(x, y) {
     ctx.fill();
 }
 
-//animation setup
-function setup() {
-    fitToContainer();
-    window.requestAnimationFrame(draw);
-}
-
-//animation loop
-function draw() {
-    fitToContainer();
-
-    document.onmousemove = function (event) {
-        cursorX = event.pageX;
-        cursorY = event.pageY;
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    //draw dots
-    for (var i = -spacing; i <= canvas.width + spacing * 2; i += spacing) {
-    	for (var j = -spacing; j <= canvas.height + spacing * 2; j += spacing) {
-    		drawDot(i - (cursorX / canvas.width) * movement, j - (cursorY / canvas.height) * movement);
-    	}
-    }
-
-    window.requestAnimationFrame(draw);
-}
-
-window.addEventListener("DOMContentLoaded", function () {
-    setup();
-});
+//----------------- File Handling
 
 //drop handler
 function handleFileSelect(evt) {
@@ -147,12 +162,38 @@ function handleFileSelect(evt) {
 	}
 }
 
+//drag handler
 function handleDragOver(evt) {
 	evt.stopPropagation();
 	evt.preventDefault();
 	evt.dataTransfer.dropEffect = 'copy';
 }
 
-var dropZone = document.getElementById('drop');
-dropZone.addEventListener('dragover', handleDragOver, false);
-dropZone.addEventListener('drop', handleFileSelect, false);
+//----------------- Runtime
+
+//animation setup
+function setup() {
+    fitToContainer();
+    window.requestAnimationFrame(draw);
+}
+
+//animation loop
+function draw() {
+    fitToContainer();
+
+    document.onmousemove = function (event) {
+        cursorX = event.pageX;
+        cursorY = event.pageY;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    //draw dots
+    for (var i = -spacing; i <= canvas.width + spacing * 2; i += spacing) {
+    	for (var j = -spacing; j <= canvas.height + spacing * 2; j += spacing) {
+    		drawDot(i - (cursorX / canvas.width) * movement, j - (cursorY / canvas.height) * movement);
+    	}
+    }
+
+    window.requestAnimationFrame(draw);
+}
