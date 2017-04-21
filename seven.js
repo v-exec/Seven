@@ -33,7 +33,8 @@ function getRandomInt(min, max) {
 //gets image and data to html elements
 function data() {
 	//sets image in html
-	document.getElementById('frame').setAttribute("style", "background-image: url("+ select +");");
+	document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: " + (w / h).toFixed(2) * 420 + "px;");
+	document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 270)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 270)/2*-1 + "px;");
 	
 	//posts dimensions
 	if (w != null && h != null && w != 0 && h != 0){
