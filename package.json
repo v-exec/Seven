@@ -1,0 +1,15 @@
+{
+  "name": "Seven",
+  "version": "1.0.0",
+  "description": "Image-viewer",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/v-exec/seven",
+  "author": "Victor Ivanov",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "~1.6.2"
+  }
+}

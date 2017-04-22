@@ -1,7 +1,7 @@
 # Seven
 
-_Seven_ is a web-based image-viewing application. Its purpose is to provide an aesthetically pleasing digital-gallery-esque environment in which to view locally saved images.
+_Seven_ is an image-viewing application - an alternative to the default OS media viewer, essentially. Its purpose is to provide an aesthetically pleasing digital-gallery-esque environment in which to view locally saved images.
 
-I will likely build a standalone application out of the currently existing code, where I expect to add in-folder browsing through the user interface.
+I am currently creating the standalone version of the program for desktop usage. It will include in-folder browsing through images.
 
-More information found [here](http://v-os.ca/seven), along with the live web application [here](http://v-os.ca/x/seven).
+More information found [here](http://v-os.ca/seven). Download coming soon.
