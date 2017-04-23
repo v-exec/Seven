@@ -2,14 +2,16 @@
   "name": "Seven",
   "version": "1.0.0",
   "description": "Image-viewer",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "repository": "https://github.com/v-exec/seven",
   "author": "Victor Ivanov",
   "license": "MIT",
+  "main": "main.js",
+  "repository": "https://github.com/v-exec/seven",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . Seven --win32 --out --icon=icon.ico --overwrite"
+  },
   "devDependencies": {
-    "electron": "~1.6.2"
+    "electron": "~1.6.2",
+    "electron-packager": "~8.6.0"
   }
 }

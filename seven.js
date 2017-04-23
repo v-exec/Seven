@@ -1,4 +1,30 @@
+//----------------- File Constructor Setup
+
+var getFileBlob = function (url, cb) {
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url);
+	xhr.responseType = "blob";
+	xhr.addEventListener('load', function() {
+	    cb(xhr.response);
+	});
+	xhr.send();
+};
+
+var blobToFile = function (blob, name) {
+	blob.lastModifiedDate = new Date();
+	blob.name = name;
+	return blob;
+};
+
+var getFileObject = function(filePathOrUrl, name, cb) {
+	getFileBlob(filePathOrUrl, function (blob) {
+		cb(blobToFile(blob, name));
+	});
+};
+
 //----------------- Setup
+
+//canvases and mouse coordinates
 var canvas = document.getElementById('back');
 var ctx = canvas.getContext('2d');
 
@@ -8,26 +34,44 @@ var pix = pixels.getContext('2d');
 var cursorX = canvas.width;
 var cursorY = canvas.height;
 
+//background dots parameters
 var spacing = 25;
 var movement = 20;
 
+//image path and image data
 var select;
 var n, s, t, d, w, h;
 
+//image and file reader
 var reader = new FileReader();
 var img = new Image();
 
+//whether or not image is zoomed
 var zooming = false;
 
+//set up drop zone listeners
 var dropZone = document.getElementById('drop');
+
+//get command line arguments
+var remote = require('electron').remote;
+var args = remote.getGlobal('arguments').arg;
+var directory;
+
+//set UI to invisible until load
+document.getElementById('center').setAttribute("style", "display: none;");
+
+//----------------- Listeners
+
+//drop zone listeners
 dropZone.addEventListener('dragover', handleDragOver, false);
 dropZone.addEventListener('drop', handleFileSelect, false);
 
+//run setup on DOM load
 window.addEventListener("DOMContentLoaded", function () {
     setup();
 });
 
-//----------------- General
+//----------------- Functions
 
 //fit canvas to its container
 function fitToContainer() {
@@ -42,16 +86,27 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-//----------------- DOM
+//loads image data
+function loadImage() {
+	var dirs = args[1].split("\\");
+	var name = dirs[dirs.length-1];
+	directory = dirs[dirs.length-2];
+
+	getFileObject(args[1], name, function (fileObject) {
+		readImage(fileObject);
+	});
+
+	remote.getGlobal('reset').r = false;
+}
 
 //gets image and data to html elements
 function data() {
 	//sets image in html
 	document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: " + (w / h).toFixed(2) * 420 + "px;");
-	document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 270)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 270)/2*-1 + "px;");
+	document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 250)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 250)/2*-1 + "px;");
 	
 	//posts dimensions
-	if (w != null && h != null && w != 0 && h != 0){
+	if (w != null && h != null && w != 0 && h != 0) {
 		document.getElementById('dimensions').innerHTML = "Dimensions: " + w + " x " + h;
 		document.getElementById('ratio').innerHTML = "Aspect Ratio: " + (w / h).toFixed(2);
 		document.getElementById('width').innerHTML = "Width: " + w + " pixels";
@@ -65,20 +120,18 @@ function data() {
 	if (s != null) document.getElementById('size').innerHTML = "Size: " + s + " bytes";
 }
 
-//scans through image and gets 5 primary colors through pixel scanning, sets them to html elements
+//scans through image and gets 4 random colors in each quarter, and one in the middle, through pixel scanning, sets them to html elements
 function color(image) {
 	var colors = new Array(5);
 
 	pixels.width = image.width;
 	pixels.height = image.height;
 	pix.drawImage(image, 0, 0, img.width, img.height);
-
-	for (var i = 0; i < 4; i++) {
-		colors[i] = pix.getImageData(getRandomInt(0, pixels.width), getRandomInt(0, pixels.height), 1, 1).data;
-	}
-
+	colors[0] = pix.getImageData(getRandomInt(0, pixels.width/2), getRandomInt(0, pixels.height/2), 1, 1).data;
+	colors[1] = pix.getImageData(getRandomInt(pixels.width/2, pixels.width), getRandomInt(0, pixels.height/2), 1, 1).data;
+	colors[2] = pix.getImageData(getRandomInt(0, pixels.width/2), getRandomInt(pixels.height/2, pixels.height), 1, 1).data;
+	colors[3] = pix.getImageData(getRandomInt(pixels.width/2, pixels.width), getRandomInt(pixels.height/2, pixels.height), 1, 1).data;
 	colors[4] = pix.getImageData(pixels.width/2 + getRandomInt(-10, 10), pixels.height/2 + getRandomInt(-10, 10), 1, 1).data;
-	
 	colors.sort(compareColors);
 
 	for (var i = 0; i < 5; i++) {
@@ -99,11 +152,8 @@ function zoom() {
 		if (!zooming) {
 			if (img.width > canvas.width || img.height > canvas.height) {
 				document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: 100%; height: 100%;");
-				if (img.width - canvas.width > img.height - canvas.height) {
-					document.getElementById('center').setAttribute("style", "width: "+canvas.width+"px; height:"+ canvas.width / (w/h).toFixed(2) +"px; margin-left: -"+canvas.width/2+"px; margin-top: -"+ (canvas.width / (w/h).toFixed(2))/2+"px;");
-				} else {
-					document.getElementById('center').setAttribute("style", "width: "+canvas.height * (w/h).toFixed(2)+"px; height:"+canvas.height+"px; margin-left: -"+canvas.height * (w/h).toFixed(2)/2+"px; margin-top: -"+canvas.height/2+"px;");
-				}
+				if (img.width - canvas.width > img.height - canvas.height) document.getElementById('center').setAttribute("style", "width: "+canvas.width+"px; height:"+ canvas.width / (w/h).toFixed(2) +"px; margin-left: -"+canvas.width/2+"px; margin-top: -"+ (canvas.width / (w/h).toFixed(2))/2+"px;");
+				else document.getElementById('center').setAttribute("style", "width: "+canvas.height * (w/h).toFixed(2)+"px; height:"+canvas.height+"px; margin-left: -"+canvas.height * (w/h).toFixed(2)/2+"px; margin-top: -"+canvas.height/2+"px;");
 			} else {
 				document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: 100%; height: 100%;");
 				document.getElementById('center').setAttribute("style", "width: "+img.width+"px; height:"+img.height+"px; margin-left: -"+img.width/2+"px; margin-top: -"+img.height/2+"px;");
@@ -113,19 +163,16 @@ function zoom() {
 
 		} else {
 			document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: " + (w / h).toFixed(2) * 420 + "px;");
-			document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 270)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 270)/2*-1 + "px;");
+			document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 250)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 250)/2*-1 + "px;");
 			document.getElementById('data').setAttribute("style", "");
 			zooming = false;
 		}
 	}
 }
 
-//----------------- Drawing
-
 //draws dot
 function drawDot(x, y) {
 	var size = 0.5;
-
     ctx.beginPath();
     ctx.arc(x, y, size, 0, Math.PI * 2, true);
     ctx.closePath();
@@ -133,14 +180,22 @@ function drawDot(x, y) {
     ctx.fill();
 }
 
-//----------------- File Handling
-
 //drop handler
 function handleFileSelect(evt) {
 	evt.stopPropagation();
 	evt.preventDefault();
-
 	var file = evt.dataTransfer.files[0];
+	readImage(file);
+}
+
+//drag handler
+function handleDragOver(evt) {
+	evt.stopPropagation();
+	evt.preventDefault();
+}
+
+//read file and parse its data
+function readImage(file) {
 	reader.readAsDataURL(file);
 
 	reader.onload = function(e) {
@@ -162,13 +217,6 @@ function handleFileSelect(evt) {
 	}
 }
 
-//drag handler
-function handleDragOver(evt) {
-	evt.stopPropagation();
-	evt.preventDefault();
-	evt.dataTransfer.dropEffect = 'copy';
-}
-
 //----------------- Runtime
 
 //animation setup
@@ -180,12 +228,10 @@ function setup() {
 //animation loop
 function draw() {
     fitToContainer();
-
     document.onmousemove = function (event) {
         cursorX = event.pageX;
         cursorY = event.pageY;
     }
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //draw dots
@@ -195,5 +241,9 @@ function draw() {
     	}
     }
 
+    //loads image, if new image
+    args = remote.getGlobal('arguments').arg;
+    if (args.length > 1 && remote.getGlobal('reset').r) loadImage();
+   
     window.requestAnimationFrame(draw);
 }
