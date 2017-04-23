@@ -55,7 +55,10 @@ var dropZone = document.getElementById('drop');
 //get command line arguments
 var remote = require('electron').remote;
 var args = remote.getGlobal('arguments').arg;
+
+//directory contents
 var directory;
+var images;
 
 //set UI to invisible until load
 document.getElementById('center').setAttribute("style", "display: none;");
@@ -86,15 +89,22 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-//loads image data
+//loads image data and gets image paths in image directory
 function loadImage() {
 	var dirs = args[1].split("\\");
 	var name = dirs[dirs.length-1];
-	directory = dirs[dirs.length-2];
 
 	getFileObject(args[1], name, function (fileObject) {
 		readImage(fileObject);
 	});
+
+	directory = dirs[0];
+	for (var i = 1; i < dirs.length; i++) {
+		if (i < dirs.length-1) directory += dirs[i] + "\\";
+		else {
+			directory += dirs[i];
+		}
+	}
 
 	remote.getGlobal('reset').r = false;
 }
