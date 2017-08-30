@@ -35,8 +35,13 @@ var cursorX = canvas.width;
 var cursorY = canvas.height;
 
 //background dots parameters
-var spacing = 25;
-var movement = 20;
+var dotSpacing = 25;
+var dotMovement = 20;
+var dotSize = 0.5;
+var dotR = 0;
+var dotG = 0;
+var dotB = 0;
+var dotA = 1;
 
 //image path and image data
 var select;
@@ -78,15 +83,15 @@ window.addEventListener("DOMContentLoaded", function () {
 
 //fit canvas to its container
 function fitToContainer() {
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+	canvas.style.width = '100%';
+	canvas.style.height = '100%';
+	canvas.width = canvas.offsetWidth;
+	canvas.height = canvas.offsetHeight;
 }
 
 //random int in range
 function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 //loads image data and gets image paths in image directory
@@ -182,12 +187,11 @@ function zoom() {
 
 //draws dot
 function drawDot(x, y) {
-	var size = 0.5;
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(204, 204, 204, 0.7)";
-    ctx.fill();
+	ctx.beginPath();
+	ctx.arc(x, y, dotSize, 0, Math.PI * 2, true);
+	ctx.closePath();
+	ctx.fillStyle = "rgba("+dotR+", "+dotG+", "+dotB+", "+dotA+")";
+	ctx.fill();
 }
 
 //drop handler
@@ -231,29 +235,29 @@ function readImage(file) {
 
 //animation setup
 function setup() {
-    fitToContainer();
-    window.requestAnimationFrame(draw);
+	fitToContainer();
+	window.requestAnimationFrame(draw);
 }
 
 //animation loop
 function draw() {
-    fitToContainer();
-    document.onmousemove = function (event) {
-        cursorX = event.pageX;
-        cursorY = event.pageY;
-    }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+	fitToContainer();
+	document.onmousemove = function (event) {
+		cursorX = event.pageX;
+		cursorY = event.pageY;
+	}
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    //draw dots
-    for (var i = -spacing; i <= canvas.width + spacing * 2; i += spacing) {
-    	for (var j = -spacing; j <= canvas.height + spacing * 2; j += spacing) {
-    		drawDot(i - (cursorX / canvas.width) * movement, j - (cursorY / canvas.height) * movement);
-    	}
-    }
+	//draw dots
+	for (var i = -dotSpacing; i <= canvas.width + dotSpacing * 2; i += dotSpacing) {
+		for (var j = -dotSpacing; j <= canvas.height + dotSpacing * 2; j += dotSpacing) {
+			drawDot(i - (cursorX / canvas.width) * dotMovement, j - (cursorY / canvas.height) * dotMovement);
+		}
+	}
 
-    //loads image, if new image
-    args = remote.getGlobal('arguments').arg;
-    if (args.length > 1 && remote.getGlobal('reset').r) loadImage();
-   
-    window.requestAnimationFrame(draw);
+	//loads image, if new image
+	args = remote.getGlobal('arguments').arg;
+	if (args.length > 1 && remote.getGlobal('reset').r) loadImage();
+
+	window.requestAnimationFrame(draw);
 }

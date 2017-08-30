@@ -1,10 +1,3 @@
-/*
-background: #111;
-frame: #222;
-text: #ccc;
-dots: 204 0.7a;
-*/
-
 ::-moz-selection {
 	color: #000;
 	background: #ccc;
@@ -16,7 +9,7 @@ dots: 204 0.7a;
 }
 
 body {
-	background-color: #111;
+	background-color: #eee;
 	overflow: hidden;
 }
 
@@ -39,8 +32,8 @@ body {
 	display: inline-block;
 	width: 70%;
 	height: 100%;
-	background-color: #222;
-	border-radius: 5px;
+	background-color: #fff;
+	border-radius: 2px;
 	background-size: cover;
 	background-position: center;
 	margin-right: 10px;
@@ -64,7 +57,7 @@ body {
 
 .datum {
 	display: block;
-	color: #ccc;
+	color: #111;
 	font-family: "Roboto Mono";
 	font-weight: 400;
 	font-size: 10pt;
@@ -82,8 +75,8 @@ body {
 	display: inline-block;
 	width: 42px;
 	height: 42px;
-	border-radius: 2px;
-	background-color: #222;;
+	border-radius: 1px;
+	background-color: #fff;
 	margin-right: 4px;
 }
 
