@@ -33,6 +33,9 @@ var pix = pixels.getContext('2d');
 
 var cursorX = canvas.width;
 var cursorY = canvas.height;
+var nCursorX = 0;
+var nCursorY = 0;
+var ease = 0.1;
 
 //background dots parameters
 var dotSpacing = 25;
@@ -248,10 +251,17 @@ function draw() {
 	}
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+	//ease dots
+	var dx = cursorX - nCursorX;
+	nCursorX += dx * ease;
+
+	var dy = cursorY - nCursorY;
+	nCursorY += dy * ease;
+
 	//draw dots
 	for (var i = -dotSpacing; i <= canvas.width + dotSpacing * 2; i += dotSpacing) {
 		for (var j = -dotSpacing; j <= canvas.height + dotSpacing * 2; j += dotSpacing) {
-			drawDot(i - (cursorX / canvas.width) * dotMovement, j - (cursorY / canvas.height) * dotMovement);
+			drawDot(i - (nCursorX / canvas.width) * dotMovement, j - (nCursorY / canvas.height) * dotMovement);
 		}
 	}
 
