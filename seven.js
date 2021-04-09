@@ -1,55 +1,46 @@
-//----------------- Setup
+const canvas = document.getElementById('back');
+const ctx = canvas.getContext('2d');
 
-//canvases and mouse coordinates
-var canvas = document.getElementById('back');
-var ctx = canvas.getContext('2d');
+const pixels = document.getElementById('pixels');
+const pix = pixels.getContext('2d');
 
-var pixels = document.getElementById('pixels');
-var pix = pixels.getContext('2d');
+const dataSpaceWidth = 250;
+const totalHeightSpace = 420;
 
-var cursorX = canvas.width;
-var cursorY = canvas.height;
-var nCursorX = 0;
-var nCursorY = 0;
-var ease = 0.1;
+let cursorX = canvas.width;
+let cursorY = canvas.height;
+let nCursorX = 0;
+let nCursorY = 0;
+const ease = 0.1;
 
-//background dots parameters
-var dotSpacing = 25;
-var dotMovement = 20;
-var dotSize = 0.5;
-var dotR = 0;
-var dotG = 0;
-var dotB = 0;
-var dotA = 1;
+//background dots
+const dotSpacing = 25;
+const dotMovement = 20;
+const dotSize = 0.5;
+let dotR = 0;
+let dotG = 0;
+let dotB = 0;
+let dotA = 1;
+let dark = false;
+const switcher = document.getElementById('switcher');
 
-//image path and image data
-var select;
-var n, s, t, d, w, h;
+//image path and data
+let select;
+let n, s, t, d, w, h;
 
 //file reader and image
-var reader = new FileReader();
-var img = new Image();
+const reader = new FileReader();
+const img = new Image();
 
-//whether or not image is zoomed
-var zooming = false;
-
-//set up drop zone listeners
-var dropZone = document.getElementById('drop');
-
-//----------------- Listeners
-
-//drop zone listeners
+const dropZone = document.getElementById('drop');
 dropZone.addEventListener('dragover', handleDragOver, false);
 dropZone.addEventListener('drop', handleFileSelect, false);
+switcher.addEventListener('click', handleDarkSwitch, false);
 
-//run setup on DOM load
 window.addEventListener("DOMContentLoaded", function () {
 	setup();
 });
 
-//----------------- Functions
-
-//fit canvas to its container
 function fitToContainer() {
 	canvas.style.width = '100%';
 	canvas.style.height = '100%';
@@ -62,13 +53,13 @@ function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-//gets image and data to html elements
+//image and data to html
 function data() {
-	//sets image in html
-	document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: " + (w / h).toFixed(2) * 420 + "px;");
-	document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 250)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 250)/2*-1 + "px;");
+	var aspectRatio = (w / h).toFixed(2);
+
+	document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: " + aspectRatio * totalHeightSpace + "px;");
+	document.getElementById('center').setAttribute("style", "width: " + (aspectRatio * totalHeightSpace + dataSpaceWidth) + "px;");
 	
-	//posts dimensions
 	if (w != null && h != null && w != 0 && h != 0) {
 		document.getElementById('dimensions').innerHTML = "Dimensions: " + w + " x " + h;
 		document.getElementById('ratio').innerHTML = "Aspect Ratio: " + (w / h).toFixed(2);
@@ -76,14 +67,13 @@ function data() {
 		document.getElementById('height').innerHTML = "Height: " + h + " pixels";
 	}
 
-	//posts file data
 	if (n != null) document.getElementById('name').innerHTML = n;
 	if (t != null) document.getElementById('type').innerHTML = "Filetype: " + t;
 	if (d != null) document.getElementById('date').innerHTML = "Last Modified: " + d;
 	if (s != null) document.getElementById('size').innerHTML = "Size: " + s + " bytes";
 }
 
-//scans through image and gets 4 random colors in each quarter, and one in the middle, through pixel scanning, sets them to html elements
+//scans through image and gets 4 random colors in each quarter, and one in the middle, and sets them to html elements
 function color(image) {
 	var colors = new Array(5);
 
@@ -109,31 +99,6 @@ function compareColors(a, b) {
 	return aa - ab;
 }
 
-//zoom into image
-function zoom() {
-	if (img.width != 0) {
-		if (!zooming) {
-			if (img.width > canvas.width || img.height > canvas.height) {
-				document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: 100%; height: 100%;");
-				if (img.width - canvas.width > img.height - canvas.height) document.getElementById('center').setAttribute("style", "width: "+canvas.width+"px; height:"+ canvas.width / (w/h).toFixed(2) +"px; margin-left: -"+canvas.width/2+"px; margin-top: -"+ (canvas.width / (w/h).toFixed(2))/2+"px;");
-				else document.getElementById('center').setAttribute("style", "width: "+canvas.height * (w/h).toFixed(2)+"px; height:"+canvas.height+"px; margin-left: -"+canvas.height * (w/h).toFixed(2)/2+"px; margin-top: -"+canvas.height/2+"px;");
-			} else {
-				document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: 100%; height: 100%;");
-				document.getElementById('center').setAttribute("style", "width: "+img.width+"px; height:"+img.height+"px; margin-left: -"+img.width/2+"px; margin-top: -"+img.height/2+"px;");
-			}
-			document.getElementById('data').setAttribute("style", "display: none;");
-			zooming = true;
-
-		} else {
-			document.getElementById('frame').setAttribute("style", "background-image: url("+ select +"); width: " + (w / h).toFixed(2) * 420 + "px;");
-			document.getElementById('center').setAttribute("style", "width: " + ((w / h).toFixed(2) * 420 + 250)*1 + "px; margin-left: " + ((w / h).toFixed(2) * 420 + 250)/2*-1 + "px;");
-			document.getElementById('data').setAttribute("style", "");
-			zooming = false;
-		}
-	}
-}
-
-//draws dot
 function drawDot(x, y) {
 	ctx.beginPath();
 	ctx.arc(x, y, dotSize, 0, Math.PI * 2, true);
@@ -142,9 +107,6 @@ function drawDot(x, y) {
 	ctx.fill();
 }
 
-//----------------- File Handling
-
-//drop handler
 function handleFileSelect(evt) {
 	evt.stopPropagation();
 	evt.preventDefault();
@@ -152,10 +114,39 @@ function handleFileSelect(evt) {
 	readImage(file);
 }
 
-//drag handler
 function handleDragOver(evt) {
 	evt.stopPropagation();
 	evt.preventDefault();
+}
+
+function handleDarkSwitch() {
+	var data = document.getElementsByClassName('datum');
+
+	if (dark) {
+		dotR = 0;
+		dotG = 0;
+		dotB = 0;
+		dotA = 1;
+		document.body.style.backgroundColor = "#eee";
+		for (var i = 0; i < data.length; i++) {
+			data[i].style.color = "#111";
+		}
+		switcher.src = "switch_dark.svg";
+
+		dark = false;
+	} else {
+		dotR = 255;
+		dotG = 255;
+		dotB = 255;
+		dotA = 1;
+		document.body.style.backgroundColor = "#111";
+		for (var i = 0; i < data.length; i++) {
+			data[i].style.color = "#eee";
+		}
+		switcher.src = "switch_light.svg";
+
+		dark = true;
+	}
 }
 
 //read file and parse its data
@@ -168,7 +159,7 @@ function readImage(file) {
 		n = file.name;
 		s = file.size;
 		t = file.type;
-		d = file.lastModifiedDate.toLocaleDateString();
+		d = new Date(file.lastModified).toLocaleDateString();
 
 		img.src = select;
 		
@@ -181,9 +172,6 @@ function readImage(file) {
 	}
 }
 
-//----------------- Runtime
-
-//animation setup
 function setup() {
 	fitToContainer();
 	window.requestAnimationFrame(draw);

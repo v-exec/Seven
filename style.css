@@ -23,9 +23,9 @@ body {
 	left: 50%;
 	width: 900px;
 	height: 420px;
-	margin-top: -210px;
-	margin-left: -450px;
-	transition: margin-left 0.4s;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
 }
 
 #frame {
@@ -33,10 +33,18 @@ body {
 	width: 70%;
 	height: 100%;
 	background-color: #fff;
-	border-radius: 2px;
+	border-radius: 4px;
 	background-size: cover;
 	background-position: center;
 	margin-right: 10px;
+}
+
+#switcher {
+	width: 40px;
+	position: fixed;
+	right: 20px;
+	top: 20px;
+	cursor: pointer;
 }
 
 #data {
@@ -75,7 +83,7 @@ body {
 	display: inline-block;
 	width: 42px;
 	height: 42px;
-	border-radius: 1px;
+	border-radius: 4px;
 	background-color: #fff;
 	margin-right: 4px;
 }
